@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaugă Restaurant - BiteSwipe</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f7f7f7; display: flex; justify-content: center; padding-top: 50px; }
+        .container { background-color: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { text-align: center; color: #FF5A5F; margin-bottom: 20px; }
+        label { font-weight: bold; margin-top: 10px; display: block; color: #333; }
+        input, textarea { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #FF5A5F; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button:hover { background-color: #e0484d; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Adaugă Restaurantul Tău</h2>
+        <form id="formularRestaurant">
+            <label>Nume Restaurant:</label>
+            <input type="text" id="nume" placeholder="Ex: Trattoria Roma" required>
+
+            <label>Locație / Adresă:</label>
+            <input type="text" id="locatie" placeholder="Ex: Str. Lipscani nr. 5, București" required>
+
+            <label>Scurtă Descriere:</label>
+            <textarea id="descriere" rows="4" placeholder="Ex: Cel mai bun loc pentru paste..." required></textarea>
+
+            <label>Link Imagine (URL):</label>
+            <input type="url" id="imagine_url" placeholder="https://..." required>
+
+            <button type="submit">Trimite spre aprobare</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('formularRestaurant').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const dateRestaurant = {
+                nume: document.getElementById('nume').value,
+                locatie: document.getElementById('locatie').value, // Trimitem și locația
+                descriere: document.getElementById('descriere').value,
+                imagine_url: document.getElementById('imagine_url').value
+            };
+
+            // Pune IP-ul tău curent aici dacă s-a schimbat
+            const adresaServerului = "http://172.20.10.2:8000/adauga_restaurant";
+
+            fetch(adresaServerului, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dateRestaurant)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === "success") {
+                    alert("Succes! Restaurantul tău a fost trimis spre aprobare.");
+                    document.getElementById('formularRestaurant').reset();
+                } else {
+                    alert("A apărut o eroare: " + data.message);
+                }
+            })
+            .catch(error => {
+                alert("Eroare de conexiune la server!");
+                console.error(error);
+            });
+        });
+    </script>
+
+</body>
+</html>

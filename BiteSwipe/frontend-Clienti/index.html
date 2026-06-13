@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>BiteSwipe - Client</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }
+        .card { width: 350px; background: white; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); overflow: hidden; text-align: center; }
+        .foto { width: 100%; height: 400px; object-fit: cover; }
+        .info { padding: 20px; }
+        .butoane { display: flex; justify-content: space-around; padding-bottom: 20px; }
+        button { border: none; padding: 15px 25px; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 18px; }
+        .nu { background: #ff4d4d; color: white; }
+        .da { background: #2ecc71; color: white; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="card" id="restaurant-card">
+        <h2 style="margin-top: 50px;">Se încarcă...</h2>
+    </div>
+</div>
+
+<script>
+    let restaurante = [];
+    let indexCurent = 0;
+
+    // 1. Luăm datele de la serverul tău Python
+    async function incarcaRestaurante() {
+        const raspuns = await fetch('http://127.0.0.1:8000/restaurante');
+        restaurante = await raspuns.json();
+        afiseazaRestaurant();
+    }
+
+    // 2. Punem restaurantul pe ecran
+    function afiseazaRestaurant() {
+        const card = document.getElementById('restaurant-card');
+        if (indexCurent >= restaurante.length) {
+            card.innerHTML = "<h2>Ai văzut tot! 🍽️</h2>";
+            return;
+        }
+
+        const r = restaurante[indexCurent];
+        card.innerHTML = `
+            <img src="${r.imagine_url}" class="foto">
+            <div class="info">
+                <h3>${r.nume}</h3>
+                <p>${r.descriere}</p>
+            </div>
+            <div class="butoane">
+                <button class="nu" onclick="urmatorul()">Pas ❌</button>
+                <button class="da" onclick="rezerva(${r.id}, '${r.nume}')">Vreau! 💚</button>
+            </div>
+        `;
+    }
+
+    function urmatorul() {
+        indexCurent++;
+        afiseazaRestaurant();
+    }
+
+    // 3. Trimitem rezervarea la server (POST)
+    async function rezerva(id, nume) {
+        const numeClient = prompt("Numele tău:");
+        const persoane = prompt("Câte persoane?");
+
+        if (numeClient && persoane) {
+            await fetch('http://127.0.0.1:8000/rezerva', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    restaurant_id: id,
+                    nume_client: numeClient,
+                    numar_persoane: parseInt(persoane)
+                })
+            });
+            alert("Rezervare trimisă!");
+            urmatorul();
+        }
+    }
+
+    incarcaRestaurante();
+</script>
+</body>
+</html>
